@@ -128,11 +128,17 @@
                 }
             });
         correct = $("#correct_answer").val(); // 正确选项
-        if (choose_answer == correct) {
-            title = "正确,答案为" + correct;
+        console.log(correct)
+        if (correct == "") { // answer为空时只负责记录答题
+            title = "提交成功";
         } else {
-            title = "错误,答案为" + correct;
+            if (choose_answer == correct) {
+                title = "正确,答案为" + correct;
+            } else {
+                title = "错误,答案为" + correct;
+            }
         }
+
         analysis = $("#analysis").val(); // 解析
         if (next == "") { // 没下一题
             buttonText = "做完了";
