@@ -2,7 +2,7 @@
 
 /* @var $this yii\web\View */
 
-$this->title = 'My Yii Application';
+$this->title = '合格考在线做题系统';
 ?>
 <header class="demos-header" style="padding: 35px 0;text-align:center;">
     <h1 class="demos-title"><?= Yii::$app->user->identity->username . "的学习任务"?></h1>

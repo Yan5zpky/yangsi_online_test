@@ -56,7 +56,7 @@ WeuiAsset::register($this);
         <p class="weui-tabbar__label">通讯录</p>
     </a>
     <a href="/exercise/all" class="weui-tabbar__item">
-        <span class="weui-badge" style="position: absolute;top: -.4em;right: 1em;">8</span>
+        <span class="weui-badge" style="position: absolute;top: -.4em;right: 1em;">1</span>
         <div class="weui-tabbar__icon">
             <img src="/images/icon_nav_article.png" alt="">
         </div>
