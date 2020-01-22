@@ -6,11 +6,13 @@ $this->title = 'My Yii Application';
 ?>
 <header class="demos-header" style="padding: 35px 0;text-align:center;">
     <h1 class="demos-title"><?= Yii::$app->user->identity->username . "的学习任务"?></h1>
+    <h2 class="weui-msg__title">离合格考还有<?= round((strtotime("2020-06-30")-strtotime(date("Y-m-d")))/86400)?>天</h2>
 </header>
+
 <div class="weui-panel">
 <?php if (is_array($task)) { ?>
-    <?php foreach ($task as $value) {?>
     <div class="weui-panel__hd">寒假作业</div>
+    <?php foreach ($task as $value) {?>
     <div class="weui-panel__bd">
         <a href="<?= "/problem/show?p_id=" . $value['first_pid'] ?>"
            class="weui-media-box weui-media-box_appmsg">
