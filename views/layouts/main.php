@@ -39,7 +39,7 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; 杨思高级中学 <?= date('Y') ?></p>
+        <p class="pull-left">&copy; SFC CHAMPIONS <?= date('Y') ?> <a target="_blank" href="http://beian.miit.gov.cn/">沪ICP备17045593号-2</a></p>
 
     </div>
 </footer>
