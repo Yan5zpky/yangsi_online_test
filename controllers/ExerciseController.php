@@ -121,7 +121,7 @@ class ExerciseController extends Controller
         $examId = Yii::$app->request->getQueryParam('e_id');
         $examInfo = Exercise::findOne($examId);
         // 获取题号
-        $problemIds = Yii::$app->db->createCommand('SELECT p_id FROM problem WHERE e_id = '.$examId.';')
+        $problemIds = Yii::$app->db->createCommand('SELECT p_id,answer FROM problem WHERE e_id = '.$examId.';')
             ->queryAll();
         $result = [];
         foreach ($problemIds as $value) {
@@ -130,6 +130,7 @@ class ExerciseController extends Controller
                     ->queryAll();
                 $result[$value['p_id']][$answer] = count($posts);
             }
+            $result[$value['p_id']]['correct_answer'] = $value['answer'];
         }
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
@@ -148,9 +149,10 @@ class ExerciseController extends Controller
         $worksheet->setCellValueByColumnAndRow(7, 2, '选C率');
         $worksheet->setCellValueByColumnAndRow(8, 2, '选D数');
         $worksheet->setCellValueByColumnAndRow(9, 2, '选D率');
+        $worksheet->setCellValueByColumnAndRow(10, 2, '正确率');
 
         //合并单元格
-        $worksheet->mergeCells('A1:I1');
+        $worksheet->mergeCells('A1:J1');
 
         $styleArray = [
             'font' => [
@@ -162,7 +164,7 @@ class ExerciseController extends Controller
         ];
         //设置单元格样式
         $worksheet->getStyle('A1')->applyFromArray($styleArray)->getFont()->setSize(28);
-        $worksheet->getStyle('A2:I2')->applyFromArray($styleArray)->getFont()->setSize(14);
+        $worksheet->getStyle('A2:J2')->applyFromArray($styleArray)->getFont()->setSize(14);
         $len = count($result);$j = 3;
         foreach ($result as $key => $row) {
             if ($row['A']+$row['B']+$row['C']+$row['D'] == 0) {
@@ -173,7 +175,18 @@ class ExerciseController extends Controller
                 $cValue = round($row['C'] / ($row['A']+$row['B']+$row['C']+$row['D']) * 100) . "%";
                 $dValue = round($row['D'] / ($row['A']+$row['B']+$row['C']+$row['D']) * 100) . "%";
             }
-            $worksheet->setCellValueByColumnAndRow(1, $j, $key);
+            if ($row['correct_answer'] == 'A') {
+                $correctNum = $aValue;
+            } else if ($row['correct_answer'] == 'B') {
+                $correctNum = $bValue;
+            } else if ($row['correct_answer'] == 'C') {
+                $correctNum = $cValue;
+            } else if ($row['correct_answer'] == 'D') {
+                $correctNum = $dValue;
+            } else {
+                $correctNum = 0;
+            }
+            $worksheet->setCellValueByColumnAndRow(1, $j, $j-2);
             $worksheet->setCellValueByColumnAndRow(2, $j, $row['A']);
             $worksheet->setCellValueByColumnAndRow(3, $j, $aValue);
             $worksheet->setCellValueByColumnAndRow(4, $j, $row['B']);
@@ -182,6 +195,7 @@ class ExerciseController extends Controller
             $worksheet->setCellValueByColumnAndRow(7, $j, $cValue);
             $worksheet->setCellValueByColumnAndRow(8, $j, $row['D']);
             $worksheet->setCellValueByColumnAndRow(9, $j, $dValue);
+            $worksheet->setCellValueByColumnAndRow(10, $j, $correctNum);
             $j++;
         }
 
@@ -198,7 +212,7 @@ class ExerciseController extends Controller
         ];
         $total_rows = $len + 2;
         //添加所有边框/居中
-        $worksheet->getStyle('A1:I'.$total_rows)->applyFromArray($styleArrayBody);
+        $worksheet->getStyle('A1:J'.$total_rows)->applyFromArray($styleArrayBody);
         $filename = '成绩表.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="'.$filename.'"');
