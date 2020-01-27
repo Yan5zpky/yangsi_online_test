@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Exercise;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -67,38 +68,40 @@ class ProblemController extends Controller
         // 获取 cache 组件
         $cache = Yii::$app->cache;
         $key = "problem_".$problemId."_info";
-//        if ($cache->exists($key)) {
-//            $problem = $cache->get($key);
-//        } else {
+        if ($cache->exists($key)) {
+            $result = $cache->get($key);
+        } else {
             $problem = Problem::find()
                 ->where(['p_id' => $problemId])
                 ->one();
-//            $cache->set($key, $problem, 86400);
-//        }
-        if (!empty($problem)) {
-            $nextProblem = Problem::find()
+            if (!empty($problem)) {
+                $nextProblem = Problem::find()
+                    ->where(['e_id' => $problem->e_id])
+                    ->andWhere(['xuhao' => $problem->xuhao + 1])
+                    ->one();
+            }
+            if (!empty($nextProblem)) { // 下一道题的序号
+                $nextPid = $nextProblem->p_id;
+            } else {
+                $nextPid = null; //最后一题
+            }
+            $exerciseType = Exercise::findOne($problem->e_id); // 测试类型
+            // 题目图片
+            $problemImg = Problemimg::find()
+                ->where(['p_id' => $problem->p_id])
+                ->andWhere(['is_active' => Problemimg::STATUS_ACTIVE])
+                ->all();
+            // 做题进度
+            $exerciseCount = Problem::find()
                 ->where(['e_id' => $problem->e_id])
-                ->andWhere(['xuhao' => $problem->xuhao + 1])
-                ->one();
+                ->count('p_id');
+            $progress = round($problem->xuhao / $exerciseCount * 100);
+            $xuhaoProgress = $problem->xuhao ."/".$exerciseCount;
+            $result = ['problem' => $problem, 'next_pid' => $nextPid, 'problem_img' => $problemImg, 'progress' => $progress, 'xuhaoProgress'=>$xuhaoProgress, "exerciseType" => $exerciseType->type];
+            $cache->set($key, $result, 86400);
         }
-        if (!empty($nextProblem)) { // 下一道题的序号
-            $nextPid = $nextProblem->p_id;
-        } else {
-            $nextPid = null; //最后一题
-        }
-        // 题目图片
-        $problemImg = Problemimg::find()
-            ->where(['p_id' => $problem->p_id])
-            ->andWhere(['is_active' => Problemimg::STATUS_ACTIVE])
-            ->all();
-        // 做题进度
-        $exerciseCount = Problem::find()
-            ->where(['e_id' => $problem->e_id])
-            ->count('p_id');
-        $progress = round($problem->xuhao / $exerciseCount * 100);
-        $xuhaoProgress = $problem->xuhao ."/".$exerciseCount;
 
-        return $this->render('show', ['problem' => $problem, 'next_pid' => $nextPid, 'problem_img' => $problemImg, 'progress' => $progress, 'xuhaoProgress'=>$xuhaoProgress]);
+        return $this->render('show', $result);
     }
 
     /**

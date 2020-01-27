@@ -72,6 +72,7 @@
 <input type="hidden" value="<?= $problem->analysis ?>" id="analysis">
 <input type="hidden" value="<?= $next_pid ?>" id="next">
 <input type="hidden" value="<?= $problem->p_id ?>" id="current">
+<input type="hidden" value="<?= $exerciseType ?>" id="e_type">
 <script type='text/javascript' src="//www.jqweui.cn/dist/js/jquery-weui.js"></script>
 <script type='text/javascript' src="/js/swiper.js"></script>
 <!--<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/city-picker.min.js"></script>-->
@@ -80,6 +81,7 @@
     analysis = $("#analysis").val(); // 解析
     current = $("#current").val(); // 下一题
     next = $("#next").val(); // 下一题
+    type = $("#e_type").val(); // 测试类型
     // console.log(correct);
     $('#slide1').slider(function (percent) {
         console.log(percent)
@@ -128,8 +130,7 @@
                 }
             });
         correct = $("#correct_answer").val(); // 正确选项
-        console.log(correct)
-        if (correct == "") { // answer为空时只负责记录答题
+        if (type == 2) { // answer为空时只负责记录答题
             title = "提交成功";
         } else {
             if (choose_answer == correct) {
