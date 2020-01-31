@@ -55,6 +55,9 @@ class AdminController extends Controller
 
     public function beforeAction($action)
     {
+        if (Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
         $role = Yii::$app->user->identity->role;
         if ($role != '0') { // 非管理员不能进入后台页面
             return $this->goHome();
@@ -199,11 +202,96 @@ class AdminController extends Controller
             ->join('LEFT JOIN', 'subject AS S', 'S.s_id = E.s_id')
 //            ->where(['E.is_active' => Exercise::STATUS_ACTIVE])
             ->all();
+        foreach ($data as &$value) {
+            if ($value['type'] == '1') {
+                $value['type'] = '题库';
+            }
+            if ($value['type'] == '2') {
+                $value['type'] = '测试';
+            }
+            if ($value['is_active'] == '0') {
+                $value['is_active'] = '不可见';
+            }
+            if ($value['is_active'] == '1') {
+                $value['is_active'] = '可见';
+            }
+        }
 
         $count = count($data);
 
         return ['code' => 0, 'message' => '', 'count' => $count, "data" => array_slice($data,$start,$limit)];
 
+    }
+
+    /**
+     * 创建任务
+     */
+    public function actionNewtask()
+    {
+        $exercise = Exercise::find()->asArray()->all();
+        if (Yii::$app->request->isPost) {
+            $request = Yii::$app->request;
+            $task = new StuTask();
+            $task->task_name = $request->post('task_name');
+            $task->content = $request->post('content');
+            $task->e_id = $request->post('e_id');
+            $task->from_time = $request->post('from_time');
+            $task->end_time = $request->post('end_time');
+            $task->save();
+        }
+
+        return $this->render('newtask', ['exercise' => $exercise]);
+    }
+
+    /**
+     * 编辑exam方法
+     */
+    public function actionEditexam()
+    {
+        $examId = Yii::$app->request->getQueryParam('e_id'); // 编辑
+        if (Yii::$app->request->isPost) { // 编辑或者新建
+            $request = Yii::$app->request;
+            $exam = Exercise::findOne($request->post('e_id'));
+            if ($exam == null) { // 新建
+                $exam = new Exercise();
+            }
+            $exam->name = $request->post('name');
+            $exam->s_id = $request->post('s_id');
+            $exam->content = $request->post('content');
+            $exam->type = $request->post('type');
+            $exam->is_active = $request->post('is_active');
+            $exam->save();
+            return $this->redirect('/admin/exam');
+        }
+
+        $subjects = Subject::find()->asArray()->all();
+        if ($examId != null) {
+            $examInfo = Exercise::findOne($examId);
+            return $this->render('editexam', ['exam' => $examInfo, 'subject' => $subjects]);
+        }
+
+        return $this->redirect('/admin/newexam');
+    }
+
+    /**
+     * 创建exam方法
+     */
+    public function actionNewexam()
+    {
+        if (Yii::$app->request->isPost) { // 编辑或者新建
+            $request = Yii::$app->request;
+            $exam = new Exercise();
+            $exam->name = $request->post('name');
+            $exam->s_id = $request->post('s_id');
+            $exam->content = $request->post('content');
+            $exam->type = $request->post('type');
+            $exam->is_active = $request->post('is_active');
+            $exam->save();
+            return $this->redirect('/admin/exam');
+        }
+        $subjects = Subject::find()->asArray()->all();
+
+        return $this->render('newexam', ['subject' => $subjects]);
     }
 
 }

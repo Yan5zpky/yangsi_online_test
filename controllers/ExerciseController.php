@@ -2,9 +2,11 @@
 
 namespace app\controllers;
 
+use app\models\User;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -135,7 +137,7 @@ class ExerciseController extends Controller
         $spreadsheet = new Spreadsheet();
         $worksheet = $spreadsheet->getActiveSheet();
         //设置工作表标题名称
-        $worksheet->setTitle($examInfo->name);
+        $worksheet->setTitle("正确率统计");
 
         //表头
         //设置单元格内容
@@ -213,7 +215,111 @@ class ExerciseController extends Controller
         $total_rows = $len + 2;
         //添加所有边框/居中
         $worksheet->getStyle('A1:J'.$total_rows)->applyFromArray($styleArrayBody);
-        $filename = '成绩表.xlsx';
+
+        // 第二张worksheet
+        $secondWorkSheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, '学生成绩');
+        $spreadsheet->addSheet($secondWorkSheet, 1);//将"My Data"工作表作为电子表格对象中的第一个工作表附加
+        // 做题情况
+        $sqlResult = Yii::$app->db->createCommand('SELECT
+            U.class,
+            U.id,
+            U.username,
+            E.e_id,
+            LOG.p_id,
+            LOG.stu_answer,
+            P.answer
+        FROM
+            `user` U
+        LEFT JOIN stu_answer_log LOG ON LOG.stu_id = U.id
+        LEFT JOIN problem P ON LOG.p_id = P.p_id
+        LEFT JOIN exercise E ON E.e_id = P.e_id
+        WHERE
+            U.role = 2
+        AND (E.e_id = '.$examId.' OR E.e_id IS NULL)
+        GROUP BY
+            U.id,
+            LOG.p_id
+        ORDER BY
+            U.class,
+            U.id,
+	        LOG.p_id;')
+            ->queryAll();
+        $answerResult = ArrayHelper::map($sqlResult, 'p_id', 'stu_answer','id'); // 每个学生的答题情况
+        $sqlResult = User::find()
+            ->where(['role' => 2])
+            ->asArray()
+            ->all();
+        $studentInfo = ArrayHelper::map($sqlResult, 'id', 'username'); // 学生姓名
+        $classInfo = ArrayHelper::map($sqlResult, 'id', 'class'); // 学生属于哪个班级
+        $sqlResult = Problem::find()
+            ->where(['e_id' => $examId])
+            ->asArray()
+            ->all();
+        $problemInfo = ArrayHelper::map($sqlResult, 'p_id', 'answer'); // 正确答案
+        $problemInfoCount = count($problemInfo); // 正确答案
+        $sheetInfo = [];
+        $sheetIndex = 0;
+        foreach ($answerResult as $studentId => $studentAnswerInfo) {
+            $sheetInfo[$sheetIndex]['class'] = $classInfo[$studentId];
+            $sheetInfo[$sheetIndex]['name'] = $studentInfo[$studentId];
+            $answerCorrectNum = 0;
+            foreach ($studentAnswerInfo as $problemId => $stuAnswer) { // 统计正确率
+                $sheetInfo[$sheetIndex]['submit_num'] = count($studentAnswerInfo);
+                if ($problemId == null) { // 未答题
+                    $sheetInfo[$sheetIndex]['submit_num'] = 0;
+                    break;
+                }
+                if ($stuAnswer == $problemInfo[$problemId]) { // 正确
+                    $answerCorrectNum++;
+                }
+            }
+
+            $sheetInfo[$sheetIndex]['answer_correct_num'] = $answerCorrectNum;
+            $sheetInfo[$sheetIndex]['all_num'] = $problemInfoCount;
+            $sheetInfo[$sheetIndex]['score'] = $answerCorrectNum."/".$problemInfoCount;
+
+            $sheetIndex++;
+        }
+
+        //表头
+        //设置单元格内容
+        $secondWorkSheet->setCellValueByColumnAndRow(1, 1, '班级');
+        $secondWorkSheet->setCellValueByColumnAndRow(2, 1, '姓名');
+        $secondWorkSheet->setCellValueByColumnAndRow(3, 1, '题目总数');
+        $secondWorkSheet->setCellValueByColumnAndRow(4, 1, '提交总数');
+        $secondWorkSheet->setCellValueByColumnAndRow(5, 1, '正确数');
+        $secondWorkSheet->setCellValueByColumnAndRow(6, 1, '正确率');
+        $secondWorkSheet->getDefaultColumnDimension()->setWidth(12);
+
+//        //合并单元格
+//        $worksheet->mergeCells('A1:J1');
+
+        $styleArray = [
+            'font' => [
+                'bold' => true
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
+        //设置单元格样式
+        $secondWorkSheet->getStyle('A1:F1')->applyFromArray($styleArray)->getFont()->setSize(14);
+        $len = count($sheetInfo);$j = 2;
+        foreach ($sheetInfo as $key => $row) {
+            $secondWorkSheet->setCellValueByColumnAndRow(1, $j, $row['class']);
+            $secondWorkSheet->setCellValueByColumnAndRow(2, $j, $row['name']);
+            $secondWorkSheet->setCellValueByColumnAndRow(3, $j, $row['all_num']);
+            $secondWorkSheet->setCellValueByColumnAndRow(4, $j, $row['submit_num']);
+            $secondWorkSheet->setCellValueByColumnAndRow(5, $j, $row['answer_correct_num']);
+            $secondWorkSheet->setCellValueByColumnAndRow(6, $j, $row['score']);
+            $j++;
+        }
+
+        $total_rows = $len + 1;
+        //添加所有边框/居中
+        $secondWorkSheet->getStyle('A1:F'.$total_rows)->applyFromArray($styleArrayBody);
+
+        $filename = $examInfo->name.'.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');

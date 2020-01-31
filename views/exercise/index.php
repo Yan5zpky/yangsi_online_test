@@ -3,12 +3,19 @@
 /* @var $this yii\web\View */
 
 $this->title = '合格考在线做题系统';
+$role = Yii::$app->user->identity->role;
 ?>
+<?php if ($role == 0) {?>
+    <header class="demos-header" style="padding: 35px 0;text-align:center;">
+        <h1 class="demos-title"><a href="/admin/index">管理后台</a></h1>
+        <h2 class="weui-msg__title">离合格考还有<?= round((strtotime("2020-06-30")-strtotime(date("Y-m-d")))/86400)?>天</h2>
+    </header>
+<?php } else { ?>
 <header class="demos-header" style="padding: 35px 0;text-align:center;">
     <h1 class="demos-title"><?= Yii::$app->user->identity->username . "的学习任务"?></h1>
     <h2 class="weui-msg__title">离合格考还有<?= round((strtotime("2020-06-30")-strtotime(date("Y-m-d")))/86400)?>天</h2>
 </header>
-
+<?php } ?>
 <div class="weui-panel">
 <?php if (is_array($task)) { ?>
     <div class="weui-panel__hd">寒假作业</div>

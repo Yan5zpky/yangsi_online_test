@@ -26,29 +26,29 @@ LayuiAsset::register($this);
     <div class="layui-header">
         <div class="layui-logo">在线做题系统后台</div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
-        <ul class="layui-nav layui-layout-left">
-            <li class="layui-nav-item"><a href="">控制台</a></li>
-            <li class="layui-nav-item"><a href="">商品管理</a></li>
-            <li class="layui-nav-item"><a href="">用户</a></li>
-            <li class="layui-nav-item">
-                <a href="javascript:;">其它系统</a>
-                <dl class="layui-nav-child">
-                    <dd><a href="">邮件管理</a></dd>
-                    <dd><a href="">消息管理</a></dd>
-                    <dd><a href="">授权管理</a></dd>
-                </dl>
-            </li>
-        </ul>
+<!--        <ul class="layui-nav layui-layout-left">-->
+<!--            <li class="layui-nav-item"><a href="">控制台</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
+<!--            <li class="layui-nav-item">-->
+<!--                <a href="javascript:;">其它系统</a>-->
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">邮件管理</a></dd>-->
+<!--                    <dd><a href="">消息管理</a></dd>-->
+<!--                    <dd><a href="">授权管理</a></dd>-->
+<!--                </dl>-->
+<!--            </li>-->
+<!--        </ul>-->
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">
                 <a href="javascript:;">
                     <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
                     <?= Yii::$app->user->identity->username?>
                 </a>
-                <dl class="layui-nav-child">
-                    <dd><a href="">基本资料</a></dd>
-                    <dd><a href="">安全设置</a></dd>
-                </dl>
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">基本资料</a></dd>-->
+<!--                    <dd><a href="">安全设置</a></dd>-->
+<!--                </dl>-->
             </li>
             <li class="layui-nav-item"><a href="/admin/logout" data-method="post">注销</a></li>
         </ul>
@@ -63,21 +63,21 @@ LayuiAsset::register($this);
                     <dl class="layui-nav-child">
                         <dd><a href="/admin/student">班级学生</a></dd>
                         <dd><a href="/admin/addstudent">添加学生</a></dd>
-                        <dd><a href="javascript:;">列表三</a></dd>
-                        <dd><a href="">超链接</a></dd>
+<!--                        <dd><a href="javascript:;">列表三</a></dd>-->
+<!--                        <dd><a href="">超链接</a></dd>-->
                     </dl>
                 </li>
                 <li class="layui-nav-item layui-nav-itemed">
                     <a href="javascript:;">学情分析</a>
                     <dl class="layui-nav-child">
                         <dd><a href="/admin/exam">题库列表</a></dd>
-                        <dd><a href="javascript:;">创建任务</a></dd>
-                        <dd><a href="javascript:;">导入题库</a></dd>
-                        <dd><a href="">超链接</a></dd>
+                        <dd><a href="/admin/newtask">创建任务</a></dd>
+<!--                        <dd><a href="javascript:;">导入题库</a></dd>-->
+<!--                        <dd><a href="">超链接</a></dd>-->
                     </dl>
                 </li>
-                <li class="layui-nav-item"><a href="">云市场</a></li>
-                <li class="layui-nav-item"><a href="">发布商品</a></li>
+<!--                <li class="layui-nav-item"><a href="">云市场</a></li>-->
+<!--                <li class="layui-nav-item"><a href="">发布商品</a></li>-->
             </ul>
         </div>
     </div>

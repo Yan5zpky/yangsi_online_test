@@ -18,12 +18,13 @@
 </div>
 
 <div class="layui-btn-group demoTable">
-    <button class="layui-btn" data-type="getCheckData">获取选中行数据</button>
-    <button class="layui-btn" data-type="getCheckLength">获取选中数目</button>
-    <button class="layui-btn" data-type="isAll">验证是否全选</button>
+<!--    <button class="layui-btn" data-type="getCheckData">获取选中行数据</button>-->
+<!--    <button class="layui-btn" data-type="getCheckLength">获取选中数目</button>-->
+<!--    <button class="layui-btn" data-type="isAll">验证是否全选</button>-->
+    <button class="layui-btn" data-type="newExam">创建新作业</button>
 </div>
 
-<table class="layui-table" lay-data="{width: 1397, height:330, url:'/admin/getexam/', page:true, id:'idTest'}" lay-filter="demo">
+<table class="layui-table" lay-data="{width: 1477, height:330, url:'/admin/getexam/', page:true, id:'idTest'}" lay-filter="demo">
     <thead>
     <tr>
         <th lay-data="{type:'checkbox', fixed: 'left'}"></th>
@@ -31,6 +32,7 @@
         <th lay-data="{field:'subject', width:100,align:'center'}">课程</th>
         <th lay-data="{field:'name', width:200, align:'center',sort: true}">名称</th>
         <th lay-data="{field:'content', width:400}">详情</th>
+        <th lay-data="{field:'type', width:80}">类型</th>
         <th lay-data="{field:'is_active', width:80}">状态</th>
         <th lay-data="{field:'create_time', width:160}">创建时间</th>
         <th lay-data="{field:'update_time', width:160}">更新时间</th>
@@ -42,7 +44,7 @@
 <script type="text/html" id="barDemo">
     <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">统计</a>
     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+<!--    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
 </script>
 
 
@@ -60,14 +62,15 @@
             var data = obj.data;
             if(obj.event === 'detail'){
                 window.open('/exercise/analysis?e_id='+data.e_id, '_self'); // 下载表格
-                layer.msg('ID：'+ data.e_id + ' 的查看操作');
+                layer.msg('开始下载'+data.name + ' 做题情况统计');
             } else if(obj.event === 'del'){
                 layer.confirm('真的删除行么', function(index){
                     obj.del();
                     layer.close(index);
                 });
             } else if(obj.event === 'edit'){
-                layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                // layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                window.location.href="/admin/editexam?e_id="+data.e_id;
             }
         });
 
@@ -85,6 +88,10 @@
             ,isAll: function(){ //验证是否全选
                 var checkStatus = table.checkStatus('idTest');
                 layer.msg(checkStatus.isAll ? '全选': '未全选')
+            }
+            ,newExam:function () {
+                window.location.href="/admin/newexam";
+
             }
         };
 
