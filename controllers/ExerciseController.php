@@ -235,7 +235,7 @@ class ExerciseController extends Controller
         LEFT JOIN exercise E ON E.e_id = P.e_id
         WHERE
             U.role = 2
-        AND (E.e_id = '.$examId.' OR E.e_id IS NULL)
+        AND (E.e_id = '.$examId.')
         GROUP BY
             U.id,
             LOG.p_id
@@ -259,28 +259,32 @@ class ExerciseController extends Controller
         $problemInfoCount = count($problemInfo); // 正确答案
         $sheetInfo = [];
         $sheetIndex = 0;
-        foreach ($answerResult as $studentId => $studentAnswerInfo) {
+        foreach ($studentInfo as $studentId => $name) {
             $sheetInfo[$sheetIndex]['class'] = $classInfo[$studentId];
             $sheetInfo[$sheetIndex]['name'] = $studentInfo[$studentId];
             $answerCorrectNum = 0;
-            foreach ($studentAnswerInfo as $problemId => $stuAnswer) { // 统计正确率
-                $sheetInfo[$sheetIndex]['submit_num'] = count($studentAnswerInfo);
-                if ($problemId == null) { // 未答题
-                    $sheetInfo[$sheetIndex]['submit_num'] = 0;
-                    break;
-                }
-                if ($stuAnswer == $problemInfo[$problemId]) { // 正确
-                    $answerCorrectNum++;
+
+            if (!array_key_exists($studentId, $answerResult)) { // 未作答
+                $sheetInfo[$sheetIndex]['submit_num'] = 0;
+            } else {
+                $studentAnswerInfo = $answerResult[$studentId];
+                foreach ($studentAnswerInfo as $problemId => $stuAnswer) { // 统计正确率
+                    $sheetInfo[$sheetIndex]['submit_num'] = count($studentAnswerInfo);
+                    if ($problemId == null) { // 未答题
+                        $sheetInfo[$sheetIndex]['submit_num'] = 0;
+                        break;
+                    }
+                    if ($stuAnswer == $problemInfo[$problemId]) { // 正确
+                        $answerCorrectNum++;
+                    }
                 }
             }
-
             $sheetInfo[$sheetIndex]['answer_correct_num'] = $answerCorrectNum;
             $sheetInfo[$sheetIndex]['all_num'] = $problemInfoCount;
             $sheetInfo[$sheetIndex]['score'] = $answerCorrectNum."/".$problemInfoCount;
 
             $sheetIndex++;
         }
-
         //表头
         //设置单元格内容
         $secondWorkSheet->setCellValueByColumnAndRow(1, 1, '班级');
