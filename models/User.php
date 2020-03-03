@@ -97,7 +97,7 @@ class User extends /*\yii\base\Object*/ \yii\db\ActiveRecord implements \yii\web
     public static function findByUsername($username)
     {
         $user = User::find()
-            ->where(['username' => $username])
+            ->where(['username' => md5($username)])
             ->asArray()
             ->one();
 
